@@ -1,25 +1,52 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { Component , Fragment} from 'react'
+//import "bootstrap/dist/css/bootstrap.min.css";
+import { Router, Route , Switch} from 'react-router-dom'
+import history from "./history";
+import QuestionPage from './components/QuestionPage';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+import "./App.css"
+import Navbar from './components/Navbar';
+import Dashboard from './components/Dashboard';
+import { connect } from 'react-redux'
+import { handleInitialData } from './actions/shared'
+import  LoadingBar from 'react-redux-loading';
+import QuestionNew from './components/QuestionNew';
+import Leaderboard from './components/Leaderboard';
+import NotFound from './components/NotFound';
+import Login from './components/Login';
+
+class App extends Component {
+  componentDidMount() {
+    this.props.dispatch(handleInitialData())
+  }
+  render() {
+    return (
+      <Router history={history}>
+        <Fragment>
+          <LoadingBar/>
+          <div className="container">
+            <Navbar/>
+            {this.props.loading === true
+              ? <Login/>
+              : <Switch>
+                    <Route path='/' exact component={Dashboard} />
+                    <Route path='/question/:id' component={QuestionPage} />
+                    <Route path='/add' component={QuestionNew} />
+                    <Route path='/leaderboard' component={Leaderboard} />
+                    <Route component={NotFound} />
+                </Switch> 
+            }
+          </div>
+         </Fragment>
+      </Router>
+    )
+  }
 }
 
-export default App;
+function mapStateToProps ({ authedUser }) {
+  return {
+    loading: authedUser === null
+  }
+}
+
+export default connect(mapStateToProps)(App)
